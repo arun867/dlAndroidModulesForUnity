@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Download Android Modules for Unity</title>
+	</head>
+<body>
+
+<h1>Download Android Modules for Unity</h1>
+
+<div><input type="file" id="file-selector" accept=".json"></div>
+
+<h2>Usage</h2>
+<ol>
+	<li>Open modules.json. On Windows 10, the path is <code>"C:\Program Files\Unity\Hub\Editor\2020.1.1f1\modules.json"</code>. It depends on your Unity version and your environment. Your file will not be uploaded to any server because the file is processed offline.</li>
+	<li>Download and unzip files.</li>
+	<li>Copy the uncompressed files to "destination" folder.</li>
+	<li>Rename them if it has "renameTo" key.</li>
+</ol>
+
+<h2>Output</h2>
+<div id="output">
+	<ul>
+		<li>id:xxx
+			<ul>
+				<li>downloadUrl: ..</li>
+				<li>destination: ..</li>
+				<li>renameFrom: ..</li>
+				<li>renameTo: ..</li>
+			</ul>
+		</li>
+	</ul>
+</div>
+
+<script>
+	const fileSelector = document.getElementById('file-selector');
+	fileSelector.addEventListener('change', (event) => {
+		var filename = event.target.files[0].name;
+		if(!filename.match(/modules.json/i)){
+			if(!confirm("The file name is not modules.json. Are you sure to continue?")){
+				return;
+			}
+		}
+		console.log(event.target.files);
+		
+		var input = event.target;
+		var reader = new FileReader();
+		reader.onload = function(){
+			var text = reader.result;
+			var json = JSON.parse(text);
+			console.log(json);
+			var outputHtml = "<ul>";
+			json.forEach(item => {
+				if(!item.id.match(/android/i)){
+					return;
+				}
+				outputHtml += "<li>id:"+item.id;
+				outputHtml += "<ul>";
+				if(item.id.match(/^android$/i)){
+					outputHtml += "<li>For .exe file, there's no need to unzip and copy files. Just run the exe file.</li>";
+				}
+				var filename = item.downloadUrl.replace(/^.+\/([^\/]+)$/i, "$1");
+				outputHtml += "<li><a href=\"" + item.downloadUrl+"\">"+filename+"</a></li>";
+				if(item.hasOwnProperty("renameFrom")){
+					outputHtml += "<li>renameFrom:"+item.renameFrom+"</li>"
+				}
+				if(item.hasOwnProperty("renameTo")){
+					outputHtml += "<li>renameTo:"+item.renameTo+"</li>"
+				}
+				if(item.hasOwnProperty("destination")){
+					outputHtml += "<li>destination:"+item.destination+"</li>"
+				}
+				outputHtml+= "</ul></li>";
+			});
+			outputHtml += "</ul>";
+			var node = document.getElementById('output');
+			node.innerHTML = outputHtml;
+		};
+		reader.readAsText(input.files[0]);
+	});
+</script>
+</body>
+</html>
